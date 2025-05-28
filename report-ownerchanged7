@@ -1,0 +1,6 @@
+$LastWeek = (Get-Date).AddDays(-7)
+$ChangedGroups = Get-ADGroup -Filter * -Properties managedBy, whenChanged | Where-Object { $_.whenChanged -gt $LastWeek }
+
+$ChangedGroups | Select-Object Name, whenChanged, managedBy | Export-Csv -Path "C:\ChangedGroups.csv" -NoTypeInformation
+
+Write-Output "Export completed! File saved to C:\ChangedGroups.csv"
