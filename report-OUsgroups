@@ -1,0 +1,31 @@
+# Define the three OUs
+$OU1 = "OU=Sales,DC=example,DC=com"
+$OU2 = "OU=IT,DC=example,DC=com"
+$OU3 = "OU=HR,DC=example,DC=com"
+
+# Create an array to store the results
+$results = @()
+
+# Function to get groups from an OU
+function Get-GroupsFromOU {
+    param (
+        [string]$OU
+    )
+    $groups = Get-ADGroup -Filter * -SearchBase $OU
+    return $groups
+}
+
+# Process each OU
+foreach ($OU in @($OU1, $OU2, $OU3)) {
+    $groups = Get-GroupsFromOU -OU $OU
+    $results += [PSCustomObject]@{
+        OU         = $OU
+        GroupCount = $groups.Count
+        GroupNames = ($groups | Select-Object -ExpandProperty Name) -join ", "
+    }
+}
+
+# Export results to CSV
+$results | Export-Csv -Path "C:\OU_Groups_Report.csv" -NoTypeInformation
+
+Write-Host "Report generated: C:\OU_Groups_Report.csv"
