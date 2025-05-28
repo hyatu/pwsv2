@@ -1,0 +1,27 @@
+# Define the date range
+$LastWeek = (Get-Date).AddDays(-7)
+
+# Search for deleted groups in Active Directory Recycle Bin
+$DeletedGroups = Get-ADObject -Filter "IsDeleted -eq $true -and ObjectClass -eq 'group'" -IncludeDeletedObjects |
+    Where-Object { $_.WhenChanged -ge $LastWeek }
+
+# Count the deleted groups
+$DeletedCount = $DeletedGroups.Count
+
+# Display the report
+Write-Output "Number of groups deleted in the last week: $DeletedCount"
+
+# Define CSV file path
+$CsvPath = "C:\Temp\DeletedGroups.csv"
+
+if ($DeletedCount -gt 0) {
+    Write-Output "Names of deleted groups:"
+    $DeletedGroups | ForEach-Object { Write-Output $_.Name }
+
+    # Export the results to a CSV file
+    $DeletedGroups | Select-Object Name, WhenChanged | Export-Csv -Path $CsvPath -NoTypeInformation
+
+    Write-Output "Results exported to $CsvPath"
+} else {
+    Write-Output "No groups were deleted in the last week."
+}
